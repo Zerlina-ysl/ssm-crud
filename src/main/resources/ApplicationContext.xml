@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+	
+	<context:component-scan base-package="com.company" >
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	
+	
+	<context:property-placeholder location="classpath:dbconfig.properties"/>
+		<bean   class="com.mchange.v2.c3p0.ComboPooledDataSource" id="datasource">
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		</bean>
+		
+		
+		<bean id="sqlsessionfactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<property name="dataSource" ref="datasource"></property>
+			<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+			<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		</bean>
+		
+		
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 扫描dao接口 加入到ioc容器 -->
+			<property name="basePackage" value="com.company.dao"></property>
+		</bean>
+		
+		<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+			<property name="dataSource" ref="datasource"></property>
+		</bean>
+		
+		<!-- 开启基于注解的事务 -->
+		<aop:config>
+		<!-- 配置切入点 -->
+		<!-- 哪些方法切入事务 -->
+			<aop:pointcut expression="execution(* com.company.service..*(..))" id="txPoint"></aop:pointcut>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+		</aop:config>
+		
+		<tx:advice id="txAdvice" transaction-manager="transactionManager">
+			<tx:attributes>
+			<!-- 所有方法都是事务方法 -->
+				<tx:method name="*"/>
+				<!-- get方法都是事务方法 -->
+				<tx:method name="get *" read-only="true"/>
+			</tx:attributes>
+		</tx:advice>
+		
+		<!-- 可以批量执行的sqlsession 
+
+!-->	
+		<bean class="org.mybatis.spring.SqlSessionTemplate" id="sqlSession">
+		<constructor-arg name="sqlSessionFactory" ref="sqlsessionfactory"></constructor-arg>	
+		<constructor-arg name="executorType" value="BATCH"></constructor-arg>	
+	</bean>
+		
+		
+		
+				</beans>
