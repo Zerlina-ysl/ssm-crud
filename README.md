@@ -1,11 +1,11 @@
 # ssm-crud
 ssm框架解决员工的增删改查
 ## 技术点
-1.后端：spring+springMVC+mybatis框架
-2.前端：bootstrap框架+原生jquery
-3.maven工具
-4.JSR303校验
-5.pagehelper分页条工具
+1. 后端：spring+springMVC+mybatis框架
+2. 前端：bootstrap框架+原生jquery
+3. maven工具
+4. JSR303校验
+5. pagehelper分页条工具
 
 
 ## 项目记录
